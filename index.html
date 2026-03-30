@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>妙麗歲數計算機v2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <!--  放入這三行開始 -->
+<link rel="icon" type="image/png" href="./icon.png">
+<link rel="apple-touch-icon" href="./icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon.png">
+<!--  放入這三行結束 -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* 模擬水彩背景氛圍 */
+        .app-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            min-height: 500px;
+            background: #fff;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+        }
+
+        .watercolor-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 223, 186, 0.3) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(186, 225, 255, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, transparent 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 想法泡泡 */
+        .thought-bubble {
+            background: white;
+            border-radius: 40px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .thought-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            right: 60px;
+            width: 30px;
+            height: 30px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+
+        .thought-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -35px;
+            right: 40px;
+            width: 15px;
+            height: 15px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.02);
+        }
+
+        .corgi-illustration {
+            width: 300px;
+            align-self: flex-end;
+            margin-top: auto;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+        }
+
+        input[type="date"] {
+            border: 1px solid #e2e8f0;
+            padding: 10px 15px;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input[type="date"]:focus {
+            border-color: #cbd5e1;
+            box-shadow: 0 0 0 3px rgba(203, 213, 225, 0.2);
+        }
+
+        .btn-calculate {
+            background: #fff;
+            border: 1.5px solid #64748b;
+            color: #475569;
+            padding: 10px 30px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-calculate:hover {
+            background: #f8fafc;
+            transform: translateY(-1px);
+        }
+
+        .btn-calculate:active {
+            transform: translateY(0px);
+        }
+
+        .result-box {
+            background: #f1f5f9;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .save-tip {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="watercolor-bg"></div>
+        
+        <div class="content flex flex-col h-full">
+            <!-- 想法泡泡區 -->
+            <div class="thought-bubble self-end w-full max-w-md">
+                <div class="flex items-center gap-2 mb-6">
+                    <span class="text-2xl">🐶</span>
+                    <h1 class="text-xl font-bold text-gray-700">妙麗歲數計算機v2.0</h1>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <label class="text-gray-600 shrink-0">狗狗的出生日期：</label>
+                        <input type="date" id="birthDate" class="flex-grow">
+                    </div>
+
+                    <button onclick="handleCalculate()" class="btn-calculate w-full sm:w-auto">開始計算</button>
+                    <div class="save-tip">✨ 點擊計算後，瀏覽器將自動記住生日唷！</div>
+
+                    <div id="result" class="result-box">
+                        <p class="text-gray-700 leading-relaxed">
+                            妙麗現在大約 <span id="dogAgeDisplay" class="font-bold text-gray-900">0.0</span> 歲狗年齡，<br>
+                            換算成人年齡大約是 <span id="humanAgeDisplay" class="font-bold text-gray-900">24.9</span> 歲。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 狗狗插畫 (柯基) -->
+            <div class="corgi-illustration">
+                <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M40 100 Q40 60 100 60 Q160 60 160 100 Q160 140 100 140 Q40 140 40 100" fill="#E6A15C" />
+                    <path d="M60 110 Q100 95 140 110 Q140 135 100 135 Q60 135 60 110" fill="#FFFFFF" />
+                    <circle cx="145" cy="70" r="35" fill="#E6A15C" />
+                    <path d="M130 75 Q145 60 160 75 Q160 90 145 90 Q130 90 130 75" fill="#FFFFFF" />
+                    <path d="M120 45 L135 20 L150 45 Z" fill="#E6A15C" />
+                    <path d="M150 45 L165 20 L180 45 Z" fill="#E6A15C" />
+                    <circle cx="140" cy="65" r="3" fill="#333" />
+                    <circle cx="160" cy="65" r="3" fill="#333" />
+                    <path d="M148 78 L152 78 L150 82 Z" fill="#333" />
+                    <rect x="55" y="130" width="15" height="15" rx="5" fill="#E6A15C" />
+                    <rect x="130" y="130" width="15" height="15" rx="5" fill="#E6A15C" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'hermione_birthday';
+
+        // 初始化：頁面載入時檢查 localStorage
+        window.onload = function() {
+            const savedDate = localStorage.getItem(STORAGE_KEY);
+            const dateInput = document.getElementById('birthDate');
+            
+            if (savedDate) {
+                dateInput.value = savedDate;
+                calculateAge(savedDate); // 有舊資料就直接跑計算
+            } else {
+                // 如果沒資料，給個預設值 2023/02/28
+                dateInput.value = "2023-02-28";
+            }
+        };
+
+        // 按鈕點擊處理：儲存並計算
+        function handleCalculate() {
+            const birthDateInput = document.getElementById('birthDate').value;
+            
+            if (!birthDateInput) {
+                const message = document.createElement('div');
+                message.textContent = "請先選擇出生日期唷！";
+                message.style.cssText = "position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#ef4444;color:white;padding:10px 20px;border-radius:10px;z-index:100;";
+                document.body.appendChild(message);
+                setTimeout(() => message.remove(), 2000);
+                return;
+            }
+
+            // --- 這是優化核心：儲存到 localStorage ---
+            localStorage.setItem(STORAGE_KEY, birthDateInput);
+            
+            calculateAge(birthDateInput);
+        }
+
+        // 核心計算邏輯
+        function calculateAge(birthDateString) {
+            const birthDate = new Date(birthDateString);
+            const today = new Date();
+            
+            let diffInMs = today - birthDate;
+            if (diffInMs < 0) {
+                updateDisplay(0, 0);
+                return;
+            }
+
+            const dogAge = diffInMs / (1000 * 60 * 60 * 24 * 365.25);
+            
+            // 柯基換算邏輯
+            let humanAge = 0;
+            if (dogAge <= 1) {
+                humanAge = dogAge * 15;
+            } else if (dogAge <= 2) {
+                humanAge = 15 + (dogAge - 1) * 9;
+            } else {
+                humanAge = 24 + (dogAge - 2) * 4;
+            }
+
+            updateDisplay(dogAge.toFixed(1), humanAge.toFixed(1));
+        }
+
+        function updateDisplay(dogAge, humanAge) {
+            const resultBox = document.getElementById('result');
+            resultBox.style.display = 'block';
+            document.getElementById('dogAgeDisplay').innerText = dogAge;
+            document.getElementById('humanAgeDisplay').innerText = humanAge;
+        }
+    </script>
+</body>
+</html>
